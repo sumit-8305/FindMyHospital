@@ -13,7 +13,7 @@ export default function Tiles() {
     useEffect(() => {
         const intervalId = setInterval(() => {
             setIndex((prevIndex) => (prevIndex + 1) % hospitalList.length);
-        }, 5000);
+        }, 10000);
 
         // Clean up the interval on component unmount
         return () => clearInterval(intervalId);}, [hospitalList.length]);
@@ -26,17 +26,17 @@ export default function Tiles() {
             </button>
             <h2>
                 <i>{hospital.name} </i>
-                by {hospital.artist}
+                by {hospital.location}
             </h2>
             <h3>
                 ({index + 1} of {hospitalList.length})
             </h3>
             <img
-                src={hospital.url}
+                src={hospital.imageURL}
                 alt={hospital.alt}
             />
             <p>
-                {hospital.description}
+                {hospital.helpline}
             </p>
             <button onClick={handleNextClick}>
                 Next
