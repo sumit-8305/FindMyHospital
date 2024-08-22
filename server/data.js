@@ -17,7 +17,7 @@ const shopData = [
   },
   {
     "shopId": 5,
-    "apples": 300
+    "apples": 10
   },
   {
     "shopId": 6,
