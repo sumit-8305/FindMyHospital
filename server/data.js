@@ -9,7 +9,7 @@ const shopData = [
   },
   {
     "shopId": 3,
-    "apples": 48
+    "apples": 33
   },
   {
     "shopId": 4,
@@ -17,7 +17,7 @@ const shopData = [
   },
   {
     "shopId": 5,
-    "apples": 10
+    "apples": 30
   },
   {
     "shopId": 6,
@@ -25,7 +25,7 @@ const shopData = [
   },
   {
     "shopId": 7,
-    "apples": 400
+    "apples": 60
   },
   {
     "shopId": 8,
@@ -39,6 +39,4 @@ const shopData = [
     "shopId": 10,
     "apples": 550
   }
-];
-
-export default shopData;
+]; export default shopData;

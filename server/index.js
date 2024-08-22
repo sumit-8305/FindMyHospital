@@ -1,50 +1,67 @@
 import express from 'express';
+import fs from 'fs';
+import chokidar from 'chokidar';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
 import cors from 'cors';
 import path from 'path';
-import fs from 'fs';
 import { fileURLToPath } from 'url';
-import shopData from './data.js'; 
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const dataFilePath = path.join(__dirname, 'data.js');
 
 const app = express();
-const PORT = 5000;
+const server = createServer(app);
+const io = new Server(server, {
+    cors: {
+        origin: 'http://localhost:5173',
+        methods: ['GET', 'POST'],
+    }
+});
 
+// Use cors middleware
 app.use(cors({
     origin: 'http://localhost:5173',
-    methods: 'GET,POST',
+    methods: ['GET', 'POST'],
 }));
-app.use(express.json());
 
-const dataFilePath = path.join(path.dirname(fileURLToPath(import.meta.url)), 'data.js');
+// Middleware to parse JSON bodies
+app.use(express.json());
 
 // Endpoint to get shop data
 app.get('/api/get-shop-data', (req, res) => {
-    try {
-        res.json(shopData);
-    } catch (error) {
-        console.error('Failed to fetch data:', error);
-        res.status(500).send('Failed to fetch data');
-    }
+    import('./data.js').then(module => {
+        res.json(module.default);
+    }).catch(error => {
+        console.error('Error retrieving data:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    });
 });
 
-// Endpoint to update shop data and write it back to data.js
+// Endpoint to update shop data
 app.post('/api/update-shop-data', (req, res) => {
-    const newShopData = req.body;
+    const updatedData = req.body;
 
-    try {
-        // Update the in-memory shop data
-        shopData.splice(0, shopData.length, ...newShopData);
+    fs.writeFile(dataFilePath, `const shopData = ${JSON.stringify(updatedData, null, 2)}; export default shopData;`, (err) => {
+        if (err) {
+            return res.status(500).json({ message: 'Failed to update data' });
+        }
 
-        // Write the updated data back to the data.js file
-        const fileContent = `const shopData = ${JSON.stringify(newShopData, null, 2)};\n\nexport default shopData;\n`;
-        fs.writeFileSync(dataFilePath, fileContent, 'utf8');
-
-        res.send('Data saved successfully');
-    } catch (error) {
-        console.error('Failed to update data:', error);
-        res.status(500).send('Failed to save data');
-    }
+        io.emit('data-updated', updatedData); // Notify all clients about the update
+        res.json({ message: 'Data updated successfully' });
+    });
 });
 
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+// Watch for changes in data.js file and notify clients
+chokidar.watch(dataFilePath).on('change', () => {
+    import('./data.js').then(module => {
+        io.emit('data-updated', module.default);
+    }).catch(error => {
+        console.error('Error watching file:', error);
+    });
+});
+
+server.listen(5000, () => {
+    console.log('Server is running on port 5000');
 });
