@@ -11,7 +11,8 @@ function Navbar() {
                     <li ><Link to="/about">About</Link></li>
                     <li ><Link to="/contact">Contact</Link></li>
                     <li><Link to="/showData">Show Data</Link></li>
-                    <li><Link to="/update-shop-data">Update Shop Data</Link></li>
+                    <li><Link to="/login">login</Link></li>
+                    {/* <li><Link to="/update-shop-data">Update Shop Data</Link></li> */}
                 </ul>
                 <form className="w-2/6 mr-4  text-xl" >
                     <label htmlFor="default-search" className="text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>

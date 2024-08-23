@@ -1,49 +1,49 @@
+// src/ShowData.jsx
 import React, { useState, useEffect } from 'react';
-import io from 'socket.io-client';
 
-const socket = io('http://localhost:5000');
+const ShowData = () => {
+    const [data, setData] = useState([]);
+    const [error, setError] = useState('');
 
-function ShowData() {
-    const [shopData, setShopData] = useState([]);
-    const [error, setError] = useState(null);
+    const fetchData = async () => {
+        const token = localStorage.getItem('authToken');
 
-    useEffect(() => {
-        fetch('http://localhost:5000/api/get-shop-data')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => setShopData(data))
-            .catch(error => {
-                console.error('Error fetching data:', error);
-                setError('Error fetching data');
+        try {
+            const response = await fetch('http://localhost:5000/api/get-shop-data', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/js',
+                },
             });
 
-        socket.on('data-updated', (newData) => {
-            setShopData(newData);
-        });
+            if (response.ok) {
+                const data = await response.json();
+                setData(data);
+            } else {
+                setError('Failed to fetch data');
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            setError('Error fetching data');
+        }
+    };
 
-        return () => {
-            socket.off('data-updated');
-        };
+    useEffect(() => {
+        fetchData();
     }, []);
 
-    if (error) {
-        return <div>{error}</div>;
-    }
-
     return (
-        <div className='mt-48'>
+        <div>
             <h1>Shop Data</h1>
+            {error && <p>{error}</p>}
             <ul>
-                {shopData.map((shop, index) => (
-                    <li key={index}>Shop {index + 1}: {shop.apples} apples</li>
+                {data.map((item, index) => (
+                    <li key={index}>Shop {item.shopNumber}: {item.apples} apples</li>
                 ))}
             </ul>
         </div>
     );
-}
+};
 
 export default ShowData;

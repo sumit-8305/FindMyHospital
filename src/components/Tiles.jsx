@@ -21,26 +21,33 @@ export default function Tiles() {
     let hospital = hospitalList[index];
     return (
         <>
-            <button onClick={handlePreviousClick}>
-                Prev
-            </button>
-            <h2>
-                <i>{hospital.name} </i>
-                by {hospital.location}
-            </h2>
-            <h3>
-                ({index + 1} of {hospitalList.length})
-            </h3>
+        <div className='flex flex-col items-center'>
             <img
                 src={hospital.imageURL}
                 alt={hospital.alt}
+                className='rounded-xl m-8 items-center w-fit h-96 object-cover'
             />
-            <p>
-                {hospital.helpline}
-            </p>
-            <button onClick={handleNextClick}>
-                Next
-            </button>
+            <div className='flex justify-center gap-4 px-4 py-2 w-screen bg-gray-200 text-4xl'>
+                <h1 className='m-4 font-bold'>{hospital.name} </h1>
+                <p className='m-4'>|</p>
+                <p className='m-4 font-semibold'>{hospital.location} </p>
+                <p className='m-4'>|</p>
+                <p className='m-4 font-semibold'>{hospital.helpline}</p>
+            </div>
+            <div className='flex justify-center gap-2 text-xl font-semibold'>
+                <button onClick={handlePreviousClick} className='bg-gray-900 text-white rounded-md px-4 py-2 m-4'>
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z"/></svg>
+                </button>
+                
+                <h3 className='m-4'>
+                    ({index + 1} of {hospitalList.length})
+                </h3>
+                
+                <button onClick={handleNextClick} className='bg-gray-900 text-white rounded-md px-4 py-2 m-4'>
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="M647-440H160v-80h487L423-744l57-56 320 320-320 320-57-56 224-224Z"/></svg>
+                </button>
+            </div>
+        </div>
         </>
     );
 }
