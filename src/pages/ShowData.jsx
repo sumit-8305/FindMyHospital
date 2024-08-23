@@ -1,45 +1,37 @@
-// src/ShowData.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import io from 'socket.io-client';
 
 const ShowData = () => {
     const [data, setData] = useState([]);
-    const [error, setError] = useState('');
-
-    const fetchData = async () => {
-        const token = localStorage.getItem('authToken');
-
-        try {
-            const response = await fetch('http://localhost:5000/api/get-shop-data', {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/js',
-                },
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                setData(data);
-            } else {
-                setError('Failed to fetch data');
-            }
-        } catch (error) {
-            console.error('Error fetching data:', error);
-            setError('Error fetching data');
-        }
-    };
 
     useEffect(() => {
-        fetchData();
+        // Fetch initial data from the server
+        fetch('http://localhost:5000/api/get-shop-data')
+            .then(response => response.json())
+            .then(data => setData(data))
+            .catch(error => console.error('Error fetching data:', error));
+
+        // Set up a WebSocket connection to listen for real-time updates
+        const socket = io('http://localhost:5000');
+
+        socket.on('data-updated', (updatedData) => {
+            setData(updatedData);
+        });
+
+        // Cleanup socket connection on component unmount
+        return () => {
+            socket.disconnect();
+        };
     }, []);
 
     return (
-        <div>
+        <div className='mt-48'>
             <h1>Shop Data</h1>
-            {error && <p>{error}</p>}
             <ul>
-                {data.map((item, index) => (
-                    <li key={index}>Shop {item.shopNumber}: {item.apples} apples</li>
+                {data.map((shop, index) => (
+                    <li key={index}>
+                        Shop No: {shop.shopId}, Apples: {shop.apples}
+                    </li>
                 ))}
             </ul>
         </div>

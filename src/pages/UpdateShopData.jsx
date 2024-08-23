@@ -1,45 +1,84 @@
-// UpdateShopData.jsx
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const UpdateShopData = () => {
-  const [shopData, setShopData] = useState([]);
+    const [shopData, setShopData] = useState([]);
+    const [selectedShop, setSelectedShop] = useState(null);
+    const [apples, setApples] = useState(0);
+    const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchShopData = async () => {
-      const token = localStorage.getItem('token'); // Get the token from local storage
+    useEffect(() => {
+        const token = localStorage.getItem('token');
 
-      try {
-        const response = await fetch('http://localhost:5000/api/get-shop-data', {
-          headers: {
-            'Authorization': `Bearer ${token}` // Include the token in the header
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error('Error fetching data');
+        if (!token) {
+            navigate('/login');
+            return;
         }
 
-        const data = await response.json();
-        setShopData(data);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
+        fetch('http://localhost:5000/api/get-shop-data', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+        .then(response => response.json())
+        .then(data => setShopData(data))
+        .catch(error => console.error('Error fetching data:', error));
+    }, [navigate]);
+
+    const handleShopChange = (e) => {
+        const shop = shopData.find(shop => shop.shopId === parseInt(e.target.value));
+        setSelectedShop(shop);
+        setApples(shop.apples);
     };
 
-    fetchShopData();
-  }, []);
+    const handleUpdate = () => {
+        const updatedData = shopData.map(shop => 
+            shop.shopId === selectedShop.shopId ? { ...shop, apples } : shop
+        );
 
-  return (
-    <div>
-      {/* Render the shop data */}
-      {shopData.map(shop => (
-        <div key={shop.id}>
-          <h3>Shop Number: {shop.shopNumber}</h3>
-          <p>Apples: {shop.apples}</p>
+        const token = localStorage.getItem('token');
+        fetch('http://localhost:5000/api/update-shop-data', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(updatedData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Data updated successfully:', data);
+        })
+        .catch(error => console.error('Error updating data:', error));
+    };
+
+    return (
+        <div className='mt-48'>
+            <h1>Update Shop Data</h1>
+            <select onChange={handleShopChange}>
+                <option>Select a shop</option>
+                {shopData.map(shop => (
+                    <option key={shop.shopNumber} value={shop.shopNumber}>
+                        Shop No: {shop.shopNumber}
+                    </option>
+                ))}
+            </select>
+            {selectedShop && (
+                <div>
+                    <h2>Edit Shop No: {selectedShop.shopNumber}</h2>
+                    <label>
+                        Apples:
+                        <input 
+                            type="number" 
+                            value={apples} 
+                            onChange={(e) => setApples(parseInt(e.target.value))}
+                        />
+                    </label>
+                    <button onClick={handleUpdate}>Update</button>
+                </div>
+            )}
         </div>
-      ))}
-    </div>
-  );
+    );
 };
 
 export default UpdateShopData;

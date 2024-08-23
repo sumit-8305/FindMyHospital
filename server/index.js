@@ -63,7 +63,7 @@ app.post('/api/login', (req, res) => {
       });
   });
   
-app.use('/api/get-shop-data', checkAuth);
+// app.use('/api/get-shop-data', checkAuth);
 app.use('/api/update-shop-data', checkAuth);
 
 app.get('/api/get-shop-data', (req, res) => {
@@ -78,7 +78,7 @@ app.get('/api/get-shop-data', (req, res) => {
 app.post('/api/update-shop-data', (req, res) => {
     const updatedData = req.body;
 
-    fs.writeFile(dataFilePath, `const shopData = ${JSON.stringify(updatedData, null, 2)}; export default shopData;`, (err) => {
+    fs.writeFile('./data.js', `const shopData = ${JSON.stringify(updatedData, null, 2)}; export default shopData;`, (err) => {
         if (err) {
             console.error('Error updating data:', err);
             return res.status(500).json({ message: 'Failed to update data' });
